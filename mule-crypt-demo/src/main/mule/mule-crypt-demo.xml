@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:crypto="http://www.mulesoft.org/schema/mule/crypto" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/crypto http://www.mulesoft.org/schema/mule/crypto/current/mule-crypto.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="025e0180-1ef7-4cbe-b0a6-1ffe787ab876" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<crypto:pgp-config name="Crypto_Pgp" doc:name="Crypto Pgp" doc:id="5ab1f145-898d-42bb-b1dc-8cfad77577a1" publicKeyring="mule_pub.gpg" >
+		<crypto:pgp-key-infos >
+			<crypto:pgp-asymmetric-key-info keyId="mule123" fingerprint="38370F904F46E34B"/>
+		</crypto:pgp-key-infos>
+	</crypto:pgp-config>
+	<crypto:pgp-config name="Crypto_Pgp_decrypt" doc:name="Crypto Pgp" doc:id="342e5463-d63e-4d8a-823c-ac4ca3f5afda" privateKeyring="mule_pri.gpg" >
+		<crypto:pgp-key-infos >
+			<crypto:pgp-asymmetric-key-info keyId="mule123" fingerprint="38370F904F46E34B" passphrase="mulesoft123" />
+		</crypto:pgp-key-infos>
+	</crypto:pgp-config>
+	<flow name="mule-encrypt-demoFlow" doc:id="ad326fd2-7a76-424d-8d06-04f33d979716" >
+		<http:listener doc:name="Listener" doc:id="a7791acb-e155-4a95-81e4-8d937333f75f" config-ref="HTTP_Listener_config" path="/encrypt"/>
+		<crypto:pgp-encrypt doc:name="Pgp encrypt" doc:id="e7370f44-9127-40dd-92b4-7701a47462cb" config-ref="Crypto_Pgp" keyId="mule123"/>
+		<logger level="INFO" doc:name="Logger" doc:id="11d1e949-6c6d-4b6b-825f-b0a383b48e68" message="#[payload]"/>
+	</flow>
+	<flow name="mule-decrypt-demoFlow" doc:id="d63f6b0d-3402-4eb9-abcc-1cc2436a0148" >
+		<http:listener doc:name="Listener" doc:id="51d284a9-4d5c-4a29-a87e-24b1988c289c" config-ref="HTTP_Listener_config" path="/decrypt"/>
+		<crypto:pgp-decrypt doc:name="Pgp decrypt" doc:id="03f002f7-234b-4759-ba64-25da882c9e9b" config-ref="Crypto_Pgp_decrypt"/>
+		<logger level="INFO" doc:name="Logger" doc:id="ea501007-9227-4804-8d25-1eb6876edeeb" message="#[payload]"/>
+	</flow>
+</mule>
